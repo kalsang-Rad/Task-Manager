@@ -7,6 +7,28 @@ const getTasks = async (req, res) => {
   res.status(200).json(tasks);
 };
 
+// get a single task
+const getTask = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ error: "No such task" });
+  }
+
+  const task = await taskModel.findById(id);
+
+  if (!task) {
+    return res.status(404).json({ error: "No such task" });
+  }
+  return res.status(200).json(task);
+};
+
+// get tasks by date
+const getTasksbyDate = async (req, res) => {
+  const tasks = await taskModel.find({}).sort({ createdAt: 1 });
+  res.status(200).json(tasks);
+};
+
 const createTask = async (req, res) => {
   const { title } = req.body;
   const getFormattedDate = () => {
@@ -53,8 +75,32 @@ const deleteTask = async (req, res) => {
   return res.status(200).json(task);
 };
 
+// update a task
+const updateTask = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ error: "No such task" });
+  }
+  const task = await taskModel.findOneAndUpdate(
+    { _id: id },
+    {
+      ...req.body,
+    }
+  );
+
+  if (!task) {
+    return res.status(404).json({ error: "No such task" });
+  }
+
+  return res.status(200).json(task);
+};
+
 module.exports = {
   getTasks,
+  getTask,
+  getTasksbyDate,
   createTask,
   deleteTask,
+  updateTask,
 };
